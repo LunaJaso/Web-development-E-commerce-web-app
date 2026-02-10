@@ -12,18 +12,18 @@ final List<Product> products = [
     id: '2',
     name: 'Dice 2',
     price: 49.99,
-    image: 'assets/images/dice1.jpg',
+    image: 'assets/images/dice2.jpg',
   ),
   Product(
     id: '3',
     name: 'Dice 3',
     price: 99.99,
-    image: 'assets/images/dice1.jpg',
+    image: 'assets/images/dice3.jpg',
   ),
   Product(
     id: '4',
     name: 'Dice 4',
-    price: 99.99,
-    image: 'assets/images/dice1.jpg',
+    price: 199.99,
+    image: 'assets/images/dice4.jpg',
   ),
 ];

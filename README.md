@@ -19,3 +19,5 @@ Week 11 tasks: Admin tools (Creating new items, login requirements?)\
 Week 12 tasks: Further advance admin tools (Delete items, edit items)\
 Week 13 tasks: Website testing (finding bugs, user testing)\
 Week 15 tasks: Project Presentation, Poster board or live demonstration
+
+Images come from pexels (Armando Are, Murilo Papini, Dagmara Dombrovska, allthings real)
