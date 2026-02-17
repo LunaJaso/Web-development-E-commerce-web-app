@@ -14,24 +14,22 @@ class ProfilePage extends StatefulWidget {
 
 // State class holds variables and logic for this page
 class _ProfilePageState extends State<ProfilePage> {
-
   // Creates and instance of AuthService
   final auth = AuthService();
 
-// Controllers read input text from each corresponding field
+  // Controllers read input text from each corresponding field
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
 
-
-// Error message if login fails
+  // Error message if login fails
   String errorMessage = "";
 
-// Variables to detect authentication status and information
+  // Variables to detect authentication status and information
   bool get isLoggedIn => auth.isLoggedIn;
   String get userName => auth.userName ?? "";
   String get email => auth.email ?? "";
 
-// Removes widget from memory, (prevents memory leaks)
+  // Removes widget from memory, (prevents memory leaks)
   @override
   void dispose() {
     usernameController.dispose();
@@ -39,11 +37,10 @@ class _ProfilePageState extends State<ProfilePage> {
     super.dispose();
   }
 
-// Page UI
+  // Page UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       // Top AppBar
       appBar: AppBar(title: const Text('Profile'), centerTitle: true),
       // Padding and content
@@ -60,7 +57,6 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _loggedInView() {
     return ListView(
       children: [
-
         // Displays user information in profile header
         _ProfileHeader(userName: userName, email: email),
         const SizedBox(height: 24),
@@ -90,21 +86,21 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-
             // Default lock icon
             const Icon(Icons.lock_outline, size: 70, color: Colors.grey),
             const SizedBox(height: 16),
 
-            // Title 
+            // Title
             const Text(
               "Login",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
 
-// Username input field
+            // Username input field
             TextField(
-              controller: usernameController, // This is where username text is read
+              controller:
+                  usernameController, // This is where username text is read
               decoration: const InputDecoration(
                 labelText: "Username",
                 border: OutlineInputBorder(),
@@ -112,9 +108,10 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 12),
 
-// Password input field (hides input text)
+            // Password input field (hides input text)
             TextField(
-              controller: passwordController, // This is where password text is read
+              controller:
+                  passwordController, // This is where password text is read
               obscureText: true, // Hides input
               decoration: const InputDecoration(
                 labelText: "Password",
@@ -123,23 +120,22 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 12),
 
-// Display error message
+            // Display error message
             if (errorMessage.isNotEmpty)
               Text(errorMessage, style: const TextStyle(color: Colors.red)),
 
             const SizedBox(height: 16),
 
-// Login button
+            // Login button
             ElevatedButton(
               onPressed: () async {
-
                 // Utilizes authentication service with inputted data
                 final success = await auth.login(
                   username: usernameController.text.trim(),
                   password: passwordController.text.trim(),
                 );
 
-// Updates UI based on login or logout
+                // Updates UI based on login or logout
                 if (success) {
                   setState(() => errorMessage = "");
                 } else {
@@ -209,7 +205,6 @@ class _ProfileOption extends StatelessWidget {
   }
 }
 
-
 // Logout button
 class _LogoutButton extends StatelessWidget {
   final VoidCallback onLogout;
@@ -218,6 +213,9 @@ class _LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(onPressed: onLogout, child: const Text('Log Out')); // Calls onLogout function here
+    return ElevatedButton(
+      onPressed: onLogout,
+      child: const Text('Log Out'),
+    ); // Calls onLogout function here
   }
 }

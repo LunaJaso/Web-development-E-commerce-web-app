@@ -18,11 +18,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       // App Name should probably be changed to someting like Eccommerce Application
-      title: 'Flutter Demo',
+      title: 'Dice Shop',
       // Global theme data
       theme: ThemeData(
         // Generates a color scheme based on input color
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
+        hoverColor:  Colors.blueAccent,
         // Enables Material Design 3 styling
         useMaterial3: true,
       ),

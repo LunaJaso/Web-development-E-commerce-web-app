@@ -30,9 +30,9 @@ class ProductsPage extends StatelessWidget {
           // Number of products in the grid
           itemCount: products.length,
 
-          // grid layout (2 columns, maybe it should be 3 at a certain width)
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
+          // grid layout (Now gets wider for larger width screens)
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 220,
             childAspectRatio: 0.7,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,

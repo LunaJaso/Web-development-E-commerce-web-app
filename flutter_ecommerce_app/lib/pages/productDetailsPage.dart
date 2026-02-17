@@ -19,67 +19,94 @@ class ProductDetailsPage extends StatelessWidget {
       // AppBar displaying product name
       appBar: AppBar(title: Text(product.name)),
 
-      // Scrollable page
-      body: ListView(
-        children: [
-          // Displays product image
-          Image.asset(
-            product.image,
-            height: 300, // Height
-            width: double.infinity, // Width
-            fit: BoxFit.cover, // Crop image
-          ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final bool isWide = constraints.maxWidth > 900;
 
-          // Padding below image
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          Widget content = ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 700),
 
-            // Column will stack widgets vertically
-            child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start, // Left aligning content
+            // Scrollable page
+            child: ListView(
+              shrinkWrap: isWide,
               children: [
-                // Displays product name
-                Text(
-                  product.name,
-                  style: Theme.of(context).textTheme.headlineSmall,
+                // Displays product image
+                Image.asset(
+                  product.image,
+                  height: 300, // Height
+                  width: double.infinity, // Width
+                  fit: BoxFit.cover, // Crop image
                 ),
 
-                // Added vertical space
-                const SizedBox(height: 8),
+                // Padding below image
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
 
-                // Displays price, formated to 2 decimal points
-                Text(
-                  '\$${product.price.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                  // Column will stack widgets vertically
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start, // Left aligning content
+                    children: [
+                      // Displays product name
+                      Text(
+                        product.name,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
 
-                // More vertical spacing
-                const SizedBox(height: 16),
+                      // Added vertical space
+                      const SizedBox(height: 8),
 
-                // Need to inmplement product description text
-                const Text('Default description'),
+                      // Displays price, formated to 2 decimal points
+                      Text(
+                        '\$${product.price.toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
 
-                // Spacing
-                const SizedBox(height: 24),
+                      // More vertical spacing
+                      const SizedBox(height: 16),
 
-                // Full screen widht button
-                SizedBox(
-                  width: double.infinity,
+                      // Need to inmplement product description text
+                      const Text('Default description'),
 
-                  // Add to cart button, still needs coding logic
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    child: const Text('Add to Cart'),
+                      // Spacing
+                      const SizedBox(height: 24),
+
+                      // Full screen widht button
+                      SizedBox(
+                        width: double.infinity,
+
+                        // Add to cart button, still needs coding logic
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          child: const Text('Add to Cart'),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+          );
+
+          if (isWide) {
+            return Center(
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(16),
+                clipBehavior: Clip.antiAlias,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 256),
+                  child: content,
+                ),
+              ),
+            );
+          }
+
+          return Center(child: content);
+        },
       ),
     );
   }
