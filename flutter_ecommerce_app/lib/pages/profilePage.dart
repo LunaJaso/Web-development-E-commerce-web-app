@@ -4,6 +4,10 @@ import 'package:flutter/material.dart';
 // Imports authentication.dart (adds login and logout functionality)
 import '../auth/authentication.dart';
 
+// Import user model and users data
+import '../models/user.dart'; 
+import '../data/users.dart'; 
+
 // Profile that adapts to Login/Logout changes (use statefulwidget instead of stateless)
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -28,6 +32,42 @@ class _ProfilePageState extends State<ProfilePage> {
   bool get isLoggedIn => auth.isLoggedIn;
   String get userName => auth.userName ?? "";
   String get email => auth.email ?? "";
+
+// Create account function
+void _createAccount() {
+  final username = usernameController.text.trim();
+  final password = passwordController.text.trim();
+  final email = 'Update in Profile Settings';
+  final displayName = username;
+
+  // Check if user already exists
+  final existingUser = users.any((user) => user.username == username);
+  if (existingUser) {
+    setState(() {
+      errorMessage = "Username already taken";
+    });
+    return;
+  }
+
+  // Create new user
+  final newUser = AppUser(
+    id: DateTime.now().millisecondsSinceEpoch.toString(),
+    username: username,
+    password: password,
+    email: email,
+    displayName: displayName,
+    isAdmin: false,
+  );
+
+  // Add to users list
+  users.add(newUser);
+
+  setState(() {
+    errorMessage = "Account created successfully! You can now log in.";
+    usernameController.clear();
+    passwordController.clear();
+  });
+}
 
   // Removes widget from memory, (prevents memory leaks)
   @override
@@ -144,6 +184,18 @@ class _ProfilePageState extends State<ProfilePage> {
               },
               child: const Text("Log In"),
             ),
+
+            const SizedBox(height: 8),
+
+// Create Account button
+ElevatedButton(
+  onPressed: _createAccount,
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.green,
+  ),
+  child: const Text("Create Account"),
+),
+
           ],
         ),
       ),

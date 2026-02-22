@@ -69,7 +69,7 @@ class ProductDetailsPage extends StatelessWidget {
                       const SizedBox(height: 16),
 
                       // Need to inmplement product description text
-                      const Text('Default description'),
+                      Text(product.desc),
 
                       // Spacing
                       const SizedBox(height: 24),
