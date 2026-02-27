@@ -6,7 +6,7 @@ import '../auth/authentication.dart';
 
 // Import user model and users data
 import '../models/user.dart'; 
-import '../data/users.dart'; 
+import '../services/users_service.dart';
 
 // Profile that adapts to Login/Logout changes (use statefulwidget instead of stateless)
 class ProfilePage extends StatefulWidget {
@@ -18,7 +18,7 @@ class ProfilePage extends StatefulWidget {
 
 // State class holds variables and logic for this page
 class _ProfilePageState extends State<ProfilePage> {
-  // Creates and instance of AuthService
+  // Creates an instance of AuthService
   final auth = AuthService();
 
   // Controllers read input text from each corresponding field
@@ -39,18 +39,9 @@ void _createAccount() {
   final password = passwordController.text.trim();
   final email = 'Update in Profile Settings';
   final displayName = username;
-
-  // Check if user already exists
-  final existingUser = users.any((user) => user.username == username);
-  if (existingUser) {
-    setState(() {
-      errorMessage = "Username already taken";
-    });
-    return;
-  }
-
-  // Create new user
+  // Create new user to Firebase
   final newUser = AppUser(
+    // Generates a random id based on current time
     id: DateTime.now().millisecondsSinceEpoch.toString(),
     username: username,
     password: password,
@@ -59,13 +50,26 @@ void _createAccount() {
     isAdmin: false,
   );
 
-  // Add to users list
-  users.add(newUser);
-
-  setState(() {
-    errorMessage = "Account created successfully! You can now log in.";
-    usernameController.clear();
-    passwordController.clear();
+  // Check for existing username in Firebase and then create
+  UsersService().getAllUsers().then((list) async {
+    // Checks if user already exists
+    final exists = list.any((u) => u.username == username);
+    if (exists) {
+      // Returns error message if user already exists
+      setState(() => errorMessage = "Username already taken");
+      return;
+    }
+    // creates new user
+    await UsersService().createUser(newUser);
+    setState(() {
+      // Displays success message and clears input fields
+      errorMessage = "Account created successfully! You can now log in.";
+      usernameController.clear();
+      passwordController.clear();
+    });
+  }).catchError((e) {
+    // Displays error message if account creation fails
+    setState(() => errorMessage = "Failed to create account: $e");
   });
 }
 
@@ -216,7 +220,7 @@ class _ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Placeholder for profile image (needs class implementation)
+        // Placeholder for profile image
         const CircleAvatar(
           radius: 40,
           backgroundImage: AssetImage('assets/profile_placeholder.png'),

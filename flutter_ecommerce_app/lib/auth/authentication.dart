@@ -1,5 +1,5 @@
-// Imports local users
-import '../data/users.dart';
+// Users service for Firebase-backed user storage
+import '../services/users_service.dart';
 // Imports user model
 import '../models/user.dart';
 
@@ -28,23 +28,14 @@ class AuthService {
     required String username,
     required String password,
   }) async {
-    try {
-      // Searches for a user model that matches the information in data
-      final user = users.firstWhere(
-        (u) => u.username == username && u.password == password,
-      );
-
-      // Stores current user
+    // Use UsersService to look up credentials in Firebase
+    final user = await UsersService().findByCredentials(username, password);
+    if (user != null) {
       _currentUser = user;
-      // Sets login to true
       _isLoggedIn = true;
-      // returns login is true, otherwise false
       return true;
     }
-    // Catches any errors, returns false if no matches found
-    catch (_) {
-      return false;
-    }
+    return false;
   }
 
   // Set current user to null and sets isLoggedIn to false
