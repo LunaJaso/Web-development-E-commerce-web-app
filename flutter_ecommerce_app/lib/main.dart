@@ -1,26 +1,31 @@
-// Imports Flutter design materials
 import 'package:flutter/material.dart';
-
-// Imports mainShell.dart
 import 'pages/mainShell.dart';
 
-// Imports core firebase package
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-// Imports config file
 import 'firebase_options.dart';
 
-// Removed default demo content as it was flagging as unused
-// Intial entry point for Flutter applications
-void main() async {
-  // Initializes Flutter widgets
+Future<void> main() async {
+  // Intilizes flutter before any other code runs
   WidgetsFlutterBinding.ensureInitialized();
-// Intilizes Firebase
+
+// initilizes firebase befor eanything else runs
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Starts appplication (MyApp)
+// If no user is currently signed in, sign in anonymously
+  if (FirebaseAuth.instance.currentUser == null) {
+    try {
+      await FirebaseAuth.instance.signInAnonymously();
+      debugPrint('Anonymous user signed in');
+    } catch (e) {
+      debugPrint('Anonymous sign-in failed: $e');
+    }
+  }
+
+// Runs the app
   runApp(const MyApp());
 }
 
@@ -30,18 +35,30 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // App Name should probably be changed to someting like Eccommerce Application
       title: 'Dice Shop',
-      // Global theme data
       theme: ThemeData(
-        // Generates a color scheme based on input color
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueAccent),
-        hoverColor: Colors.blueAccent,
-        // Enables Material Design 3 styling
         useMaterial3: true,
       ),
-      // The first screen loaded for the user when launching application (contains navigation bar)
-      home: const MainShell(),
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+// If the user is not signed in, show a signing in message
+          if (!snapshot.hasData) {
+            return const Scaffold(
+              body: Center(child: Text('Signing in…')),
+            );
+          }
+
+          return const MainShell();
+        },
+      ),
     );
   }
 }
