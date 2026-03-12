@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../auth/authentication.dart';
 
 // Import user model and users data
-import '../models/user.dart'; 
+import '../models/user.dart';
 import '../services/users_service.dart';
 
 // Profile that adapts to Login/Logout changes (use statefulwidget instead of stateless)
@@ -24,6 +24,8 @@ class _ProfilePageState extends State<ProfilePage> {
   // Controllers read input text from each corresponding field
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+  final nameControlller = TextEditingController();
+  final emailController = TextEditingController();
 
   // Error message if login fails
   String errorMessage = "";
@@ -34,50 +36,63 @@ class _ProfilePageState extends State<ProfilePage> {
   String get email => auth.email ?? "";
 
 // Create account function
-void _createAccount() {
-  final username = usernameController.text.trim();
-  final password = passwordController.text.trim();
-  final email = 'Update in Profile Settings';
-  final displayName = username;
-  // Create new user to Firebase
-  final newUser = AppUser(
-    // Generates a random id based on current time
-    id: DateTime.now().millisecondsSinceEpoch.toString(),
-    username: username,
-    password: password,
-    email: email,
-    displayName: displayName,
-    isAdmin: false,
-  );
+  void _createAccount() {
+    final username = usernameController.text.trim();
+    final password = passwordController.text.trim();
+    final email = emailController.text.trim();
+    final displayName = nameControlller.text.trim();
 
-  // Check for existing username in Firebase and then create
-  UsersService().getAllUsers().then((list) async {
-    // Checks if user already exists
-    final exists = list.any((u) => u.username == username);
-    if (exists) {
-      // Returns error message if user already exists
-      setState(() => errorMessage = "Username already taken");
+// Checks for missing inputs
+    if (username.isEmpty ||
+        password.isEmpty ||
+        email.isEmpty ||
+        displayName.isEmpty) {
+      setState(() => errorMessage = "Please fill in all fields");
       return;
     }
-    // creates new user
-    await UsersService().createUser(newUser);
-    setState(() {
-      // Displays success message and clears input fields
-      errorMessage = "Account created successfully! You can now log in.";
-      usernameController.clear();
-      passwordController.clear();
+    // Create new user to Firebase
+    final newUser = AppUser(
+      // Generates a random id based on current time
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      username: username,
+      password: password,
+      email: email,
+      displayName: displayName,
+      isAdmin: false,
+    );
+
+    // Check for existing username in Firebase and then create
+    UsersService().getAllUsers().then((list) async {
+      // Checks if user already exists
+      final exists = list.any((u) => u.username == username);
+      if (exists) {
+        // Returns error message if user already exists
+        setState(() => errorMessage = "Username already taken");
+        return;
+      }
+      // creates new user
+      await UsersService().createUser(newUser);
+      setState(() {
+        // Displays success message and clears input fields
+        errorMessage = "Account created successfully! You can now log in.";
+        usernameController.clear();
+        passwordController.clear();
+        emailController.clear();
+        nameControlller.clear();
+      });
+    }).catchError((e) {
+      // Displays error message if account creation fails
+      setState(() => errorMessage = "Failed to create account: $e");
     });
-  }).catchError((e) {
-    // Displays error message if account creation fails
-    setState(() => errorMessage = "Failed to create account: $e");
-  });
-}
+  }
 
   // Removes widget from memory, (prevents memory leaks)
   @override
   void dispose() {
     usernameController.dispose();
     passwordController.dispose();
+    nameControlller.dispose();
+    emailController.dispose();
     super.dispose();
   }
 
@@ -164,6 +179,24 @@ void _createAccount() {
             ),
             const SizedBox(height: 12),
 
+            TextField(
+              controller: nameControlller,
+              decoration: const InputDecoration(
+                labelText: "Name",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                labelText: "Email",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+
             // Display error message
             if (errorMessage.isNotEmpty)
               Text(errorMessage, style: const TextStyle(color: Colors.red)),
@@ -192,14 +225,13 @@ void _createAccount() {
             const SizedBox(height: 8),
 
 // Create Account button
-ElevatedButton(
-  onPressed: _createAccount,
-  style: ElevatedButton.styleFrom(
-    backgroundColor: Colors.green,
-  ),
-  child: const Text("Create Account"),
-),
-
+            ElevatedButton(
+              onPressed: _createAccount,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+              ),
+              child: const Text("Create Account"),
+            ),
           ],
         ),
       ),
