@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 // imports prodcut.dart
 import '../models/product.dart';
 
+// imports cart.dart
+import '../models/cart.dart';
+
 // Product Details page, StatelessWidget means the UI cannot change while running
 class ProductDetailsPage extends StatelessWidget {
   // The product on display
@@ -80,7 +83,13 @@ class ProductDetailsPage extends StatelessWidget {
 
                         // Add to cart button, still needs coding logic
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+  Cart.add(product);
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text('${product.name} added to cart')),
+  );
+},
                           child: const Text('Add to Cart'),
                         ),
                       ),

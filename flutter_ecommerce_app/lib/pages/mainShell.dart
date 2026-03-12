@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'productsPage.dart';
 // import profilePage
 import 'profilePage.dart';
+// import cartPage
+import 'cartPage.dart';
 
 // Root widget for navigation structure
 class MainShell extends StatefulWidget {
@@ -23,7 +25,7 @@ class _MainShellState extends State<MainShell> {
   // Pages for each tab
   final pages = [
     const ProductsPage(),
-    const Center(child: Text('Cart')), // Placehodler
+    const CartPage(),
     const ProfilePage(),
   ];
 
