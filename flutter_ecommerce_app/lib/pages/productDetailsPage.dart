@@ -32,6 +32,7 @@ class ProductDetailsPage extends StatelessWidget {
             // Scrollable page
             child: ListView(
               shrinkWrap: isWide,
+              padding: const EdgeInsets.only(bottom: 256),
               children: [
                 // Displays product image
                 Image.asset(
@@ -84,12 +85,14 @@ class ProductDetailsPage extends StatelessWidget {
                         // Add to cart button, still needs coding logic
                         child: ElevatedButton(
                           onPressed: () {
-  Cart.add(product);
+                            Cart.add(product);
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text('${product.name} added to cart')),
-  );
-},
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content:
+                                      Text('${product.name} added to cart')),
+                            );
+                          },
                           child: const Text('Add to Cart'),
                         ),
                       ),
@@ -106,10 +109,7 @@ class ProductDetailsPage extends StatelessWidget {
                 elevation: 4,
                 borderRadius: BorderRadius.circular(16),
                 clipBehavior: Clip.antiAlias,
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 256),
                   child: content,
-                ),
               ),
             );
           }
