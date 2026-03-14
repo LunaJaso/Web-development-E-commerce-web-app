@@ -5,6 +5,7 @@ class Product {
   final double price;
   final String image;
   final String desc;
+  final String userId;
 
   Product({
     required this.id,
@@ -12,6 +13,7 @@ class Product {
     required this.price,
     required this.image,
     required this.desc,
+    required this.userId,
   });
 
 // Converts product data to a JSON for storage in Firebase
@@ -21,6 +23,7 @@ class Product {
       'price': price,
       'image': image,
       'desc': desc,
+      'userId': userId,
     };
   }
 
@@ -34,6 +37,7 @@ class Product {
           : double.tryParse('${map['price']}') ?? 0.0,
       image: map['image'] as String? ?? '',
       desc: map['desc'] as String? ?? '',
+      userId: map['userId'] as String? ?? '',
     );
   }
 }

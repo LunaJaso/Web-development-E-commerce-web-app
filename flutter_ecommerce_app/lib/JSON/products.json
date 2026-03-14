@@ -3,25 +3,29 @@
     "name": "Dice 1",
     "price": 79.99,
     "image": "assets/images/dice1.jpg",
-    "desc": "dice1"
+    "desc": "dice1",
+    "userId": "default"
   },
   "2": {
     "name": "Dice 2",
     "price": 49.99,
     "image": "assets/images/dice2.jpg",
-    "desc": "dice2"
+    "desc": "dice2",
+    "userId": "default"
   },
   "3": {
     "name": "Dice 3",
     "price": 99.99,
     "image": "assets/images/dice3.jpg",
-    "desc": "dice3"
+    "desc": "dice3",
+    "userId": "default"
   },
   "4": {
     "name": "Dice 4",
     "price": 199.99,
     "image": "assets/images/dice4.jpg",
-    "desc": "dice4"
+    "desc": "dice4",
+    "userId": "default"
   }
 }
 }

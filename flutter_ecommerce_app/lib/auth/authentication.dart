@@ -14,6 +14,8 @@ class AuthService {
   // Holds the currently logged in user
   AppUser? _currentUser;
 
+  // Returns the current user's ID
+  String? get userId => _currentUser?.id;
   // Checks if current user is an admin
   bool get isAdmin => _currentUser?.isAdmin ?? false;
   // Checks if user is logged in (updates UI)

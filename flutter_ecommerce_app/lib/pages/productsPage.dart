@@ -69,7 +69,8 @@ class ProductsPage extends StatelessWidget {
                             ),
                             // Will load from online assets first as thats the proper way, if not online it will load locally
                             child: product.image.startsWith('http')
-                                ? Image.network(product.image, fit: BoxFit.cover)
+                                ? Image.network(product.image,
+                                    fit: BoxFit.cover)
                                 : Image.asset(product.image, fit: BoxFit.cover),
                           ),
                         ),

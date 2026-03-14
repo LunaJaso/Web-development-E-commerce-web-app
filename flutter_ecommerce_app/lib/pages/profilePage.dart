@@ -14,7 +14,6 @@ import '../pages/editProfilePage.dart';
 import '../pages/ordersPage.dart';
 import '../pages/settingsPage.dart';
 
-
 // Profile that adapts to Login/Logout changes (use statefulwidget instead of stateless)
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -131,37 +130,37 @@ class _ProfilePageState extends State<ProfilePage> {
         _ProfileHeader(userName: userName, email: email),
         const SizedBox(height: 24),
 
-        // Placeholder options (subject to change)
+        // No longer placeholders! These are now profile options that navigate to different pages (some not implemented yet)
         _ProfileOption(
-        title: 'Edit Profile',
-        icon: Icons.edit,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const EditProfilePage()),
-          );
-        },
-      ),
+          title: 'Edit Profile',
+          icon: Icons.edit,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const EditProfilePage()),
+            );
+          },
+        ),
         _ProfileOption(
-        title: 'Orders',
-        icon: Icons.shopping_bag,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const OrdersPage()),
-          );
-        },
-      ),
+          title: 'Orders',
+          icon: Icons.shopping_bag,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const OrdersPage()),
+            );
+          },
+        ),
         _ProfileOption(
-        title: 'Settings',
-        icon: Icons.settings,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const SettingsPage()),
-          );
-        },
-      ),
+          title: 'Settings',
+          icon: Icons.settings,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingsPage()),
+            );
+          },
+        ),
         isAdmin
             ? _ProfileOption(
                 title: 'Admin Tools',

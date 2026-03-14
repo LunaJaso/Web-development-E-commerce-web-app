@@ -38,7 +38,6 @@ class _CartPageState extends State<CartPage> {
                   ),
                   child: Row(
                     children: [
-
                       // Product image
                       Image.asset(
                         product.image,
@@ -115,13 +114,12 @@ class _CartPageState extends State<CartPage> {
               },
             ),
 
-            // Order buttom
+      // Order buttom
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         color: Colors.white,
         child: ElevatedButton(
           onPressed: () {
-
             // Placeholder for order placement
           },
           style: ElevatedButton.styleFrom(

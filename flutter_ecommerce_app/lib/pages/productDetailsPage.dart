@@ -109,7 +109,7 @@ class ProductDetailsPage extends StatelessWidget {
                 elevation: 4,
                 borderRadius: BorderRadius.circular(16),
                 clipBehavior: Clip.antiAlias,
-                  child: content,
+                child: content,
               ),
             );
           }
