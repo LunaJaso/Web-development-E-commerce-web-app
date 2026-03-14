@@ -21,6 +21,9 @@ class _ProfilePageState extends State<ProfilePage> {
   // Creates an instance of AuthService
   final auth = AuthService();
 
+  // shows login form by default, changes when user interacts with login and logout buttons as a toggle
+  bool showLogin = true;
+
   // Controllers read input text from each corresponding field
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
@@ -179,23 +182,37 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             const SizedBox(height: 12),
 
-            TextField(
-              controller: nameControlller,
-              decoration: const InputDecoration(
-                labelText: "Name",
-                border: OutlineInputBorder(),
+            Visibility(
+              visible: !showLogin,
+              child: Column(
+                children: [
+                  TextField(
+                    controller: nameControlller,
+                    decoration: const InputDecoration(
+                      labelText: "Name",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
 
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: "Email",
-                border: OutlineInputBorder(),
+            Visibility(
+              visible: !showLogin,
+              child: Column(
+                children: [
+                  TextField(
+                    controller: emailController,
+                    decoration: const InputDecoration(
+                      labelText: "Email",
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
 
             // Display error message
             if (errorMessage.isNotEmpty)
@@ -204,34 +221,51 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 16),
 
             // Login button
-            ElevatedButton(
-              onPressed: () async {
-                // Utilizes authentication service with inputted data
-                final success = await auth.login(
-                  username: usernameController.text.trim(),
-                  password: passwordController.text.trim(),
-                );
+            Visibility(
+              visible: showLogin,
+              child: ElevatedButton(
+                onPressed: () async {
+                  final success = await auth.login(
+                    username: usernameController.text.trim(),
+                    password: passwordController.text.trim(),
+                  );
 
-                // Updates UI based on login or logout
-                if (success) {
-                  setState(() => errorMessage = "");
-                } else {
-                  setState(() => errorMessage = "Invalid username or password");
-                }
-              },
-              child: const Text("Log In"),
+                  if (success) {
+                    setState(() => errorMessage = "");
+                  } else {
+                    setState(
+                        () => errorMessage = "Invalid username or password");
+                  }
+                },
+                child: const Text("Log In"),
+              ),
             ),
 
             const SizedBox(height: 8),
 
 // Create Account button
-            ElevatedButton(
-              onPressed: _createAccount,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+            Visibility(
+              visible: !showLogin,
+              child: ElevatedButton(
+                onPressed: _createAccount,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                ),
+                child: const Text("Create Account"),
               ),
-              child: const Text("Create Account"),
             ),
+
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  showLogin = !showLogin;
+                  errorMessage = "";
+                });
+              },
+              child: Text(
+                showLogin ? "Create an account" : "Back to login",
+              ),
+            )
           ],
         ),
       ),
