@@ -8,6 +8,13 @@ import '../auth/authentication.dart';
 import '../models/user.dart';
 import '../services/users_service.dart';
 
+import '../pages/myAdminToolsPage.dart';
+import '../pages/helpSupportPage.dart';
+import '../pages/editProfilePage.dart';
+import '../pages/ordersPage.dart';
+import '../pages/settingsPage.dart';
+
+
 // Profile that adapts to Login/Logout changes (use statefulwidget instead of stateless)
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -37,6 +44,7 @@ class _ProfilePageState extends State<ProfilePage> {
   bool get isLoggedIn => auth.isLoggedIn;
   String get userName => auth.userName ?? "";
   String get email => auth.email ?? "";
+  bool get isAdmin => auth.isAdmin;
 
 // Create account function
   void _createAccount() {
@@ -124,10 +132,61 @@ class _ProfilePageState extends State<ProfilePage> {
         const SizedBox(height: 24),
 
         // Placeholder options (subject to change)
-        const _ProfileOption(title: 'Edit Profile', icon: Icons.edit),
-        const _ProfileOption(title: 'Orders', icon: Icons.shopping_bag),
-        const _ProfileOption(title: 'Settings', icon: Icons.settings),
-        const _ProfileOption(title: 'Help & Support', icon: Icons.help_outline),
+        _ProfileOption(
+        title: 'Edit Profile',
+        icon: Icons.edit,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const EditProfilePage()),
+          );
+        },
+      ),
+        _ProfileOption(
+        title: 'Orders',
+        icon: Icons.shopping_bag,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const OrdersPage()),
+          );
+        },
+      ),
+        _ProfileOption(
+        title: 'Settings',
+        icon: Icons.settings,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SettingsPage()),
+          );
+        },
+      ),
+        isAdmin
+            ? _ProfileOption(
+                title: 'Admin Tools',
+                icon: Icons.admin_panel_settings,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MyAdminToolsPage(),
+                    ),
+                  );
+                },
+              )
+            : _ProfileOption(
+                title: 'Help & Support',
+                icon: Icons.help_outline,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HelpSupportPage(),
+                    ),
+                  );
+                },
+              ),
         const SizedBox(height: 24),
 
         // Logout button
@@ -310,8 +369,13 @@ class _ProfileHeader extends StatelessWidget {
 class _ProfileOption extends StatelessWidget {
   final String title;
   final IconData icon;
+  final VoidCallback? onTap;
 
-  const _ProfileOption({required this.title, required this.icon});
+  const _ProfileOption({
+    required this.title,
+    required this.icon,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -321,7 +385,7 @@ class _ProfileOption extends StatelessWidget {
         leading: Icon(icon),
         title: Text(title),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () {}, // Needs navigation logic (not added yet)
+        onTap: onTap,
       ),
     );
   }
