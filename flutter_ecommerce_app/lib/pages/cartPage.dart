@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/cart.dart';
+import '../pages/orderPlacementPage.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -114,13 +115,22 @@ class _CartPageState extends State<CartPage> {
               },
             ),
 
-      // Order buttom
+      // Order button
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         color: Colors.white,
         child: ElevatedButton(
-          onPressed: () {
-            // Placeholder for order placement
+          onPressed: () async {
+            final orderPlaced = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const OrderPlacementPage()),
+            );
+
+            // If order placed refresh cart
+            if (orderPlaced == true) {
+              setState(() {});
+            }
           },
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
