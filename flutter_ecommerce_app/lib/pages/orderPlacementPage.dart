@@ -3,6 +3,7 @@ import '../models/cart.dart';
 import '../models/order.dart';
 import '../auth/authentication.dart';
 import '../services/orders_service.dart';
+import '../models/address.dart';
 
 class OrderPlacementPage extends StatefulWidget {
   const OrderPlacementPage({super.key});
@@ -12,6 +13,13 @@ class OrderPlacementPage extends StatefulWidget {
 }
 
 class _OrderPlacementPageState extends State<OrderPlacementPage> {
+  // Controllers for address input fields
+  final street = TextEditingController();
+  final city = TextEditingController();
+  final state = TextEditingController();
+  final zipCode = TextEditingController();
+  final country = TextEditingController();
+
   // Calculate total amount from cart items
   double getTotalAmount() {
     double total = 0;
@@ -42,7 +50,7 @@ class _OrderPlacementPageState extends State<OrderPlacementPage> {
                       final cartItem = Cart.items[index];
                       final product = cartItem.product;
                       return ListTile(
-                        // Product Image, name, quantity, price, and total for that item
+                        // Product Image, name, quantity, price, and total
                         leading: Image.asset(product.image,
                             width: 60, height: 60, fit: BoxFit.cover),
                         title: Text(product.name,
@@ -57,6 +65,31 @@ class _OrderPlacementPageState extends State<OrderPlacementPage> {
                   ),
           ),
           const Divider(thickness: 1),
+
+          // Address input
+          const SizedBox(height: 16),
+          TextField(
+            controller: street,
+            decoration: const InputDecoration(labelText: 'Street Address'),
+          ),
+          TextField(
+            controller: city,
+            decoration: const InputDecoration(labelText: 'City'),
+          ),
+          TextField(
+            controller: state,
+            decoration: const InputDecoration(labelText: 'State'),
+          ),
+          TextField(
+            controller: zipCode,
+            decoration: const InputDecoration(labelText: 'Zip Code'),
+            keyboardType: TextInputType.number,
+          ),
+          TextField(
+            controller: country,
+            decoration: const InputDecoration(labelText: 'Country'),
+          ),
+          const SizedBox(height: 16),
 
           // Displays subtotal, tax, and total amount, and a button to confirm order
           Padding(
@@ -114,6 +147,19 @@ class _OrderPlacementPageState extends State<OrderPlacementPage> {
                         return;
                       }
 
+                      // Checka if address fields are filled in
+                      if (street.text.isEmpty ||
+                          city.text.isEmpty ||
+                          state.text.isEmpty ||
+                          zipCode.text.isEmpty ||
+                          country.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Please fill in all fields')),
+                        );
+                        return;
+                      }
+
                       // Checks if user is logged in
                       if (!authService.isLoggedIn) {
                         showDialog(
@@ -133,7 +179,7 @@ class _OrderPlacementPageState extends State<OrderPlacementPage> {
                         return;
                       }
 
-// Creates order object with data input
+                      // Creates order object with data input
                       final order = Order(
                         orderId:
                             DateTime.now().millisecondsSinceEpoch.toString(),
@@ -142,9 +188,16 @@ class _OrderPlacementPageState extends State<OrderPlacementPage> {
                             Cart.items.map((item) => item.product.id).toList(),
                         totalAmount: totalAmount * 1.05,
                         orderDate: DateTime.now(),
+                        address: Address(
+                          street: street.text,
+                          city: city.text,
+                          state: state.text,
+                          zipCode: zipCode.text,
+                          country: country.text,
+                        ),
                       );
 
-// Process into database
+                      // Process into database
                       try {
                         await OrdersService().createOrder(order);
 
@@ -154,7 +207,7 @@ class _OrderPlacementPageState extends State<OrderPlacementPage> {
                         // UI refresh
                         setState(() {});
 
-// Confirmation dialog
+                        // Confirmation dialog
                         showDialog(
                           context: context,
                           builder: (context) => AlertDialog(
@@ -196,5 +249,16 @@ class _OrderPlacementPageState extends State<OrderPlacementPage> {
         ],
       ),
     );
+  }
+
+  // Dispose controllers
+  @override
+  void dispose() {
+    street.dispose();
+    city.dispose();
+    state.dispose();
+    zipCode.dispose();
+    country.dispose();
+    super.dispose();
   }
 }

@@ -38,14 +38,21 @@ class ProductsService {
 
 // Add a new product to the database
   Future<void> addProduct(Product product) async {
-    // Generates a new key 
+    // Generates a new key
     final newRef = _ref.push();
     // Sets product data in the database
     await newRef.set(product.toJson());
   }
-// Returns a list of products created by a specific userId (this will be needed for admin tools page)
+
+// Returns a list of products created by a specific userId (this is needed for admin tools page)
   Future<List<Product>> getProductsByUser(String userId) async {
-  final all = await getAllProducts();
-  return all.where((p) => p.userId == userId).toList();
-}
+    final all = await getAllProducts();
+    return all.where((p) => p.userId == userId).toList();
+  }
+
+// Returns a list of products with their IDs
+  Future<List<Product>> getProductsByIds(List<String> ids) async {
+    final allProducts = await getAllProducts();
+    return allProducts.where((product) => ids.contains(product.id)).toList();
+  }
 }
