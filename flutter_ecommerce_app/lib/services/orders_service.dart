@@ -15,6 +15,7 @@ class OrdersService {
     await _ref.child(order.orderId).set({
       'userId': order.userId,
       'productIds': order.productIds,
+      'quantities': order.quantities,
       'totalAmount': order.totalAmount,
       'orderDate': order.orderDate.toIso8601String(),
       'address': {
@@ -47,6 +48,9 @@ class OrdersService {
             orderId: key,
             userId: orderData['userId'],
             productIds: List<String>.from(orderData['productIds']),
+            quantities: orderData['quantities'] != null
+                ? List<int>.from(orderData['quantities'])
+                : [],
             totalAmount: orderData['totalAmount'],
             orderDate: DateTime.parse(orderData['orderDate']),
             address: Address(

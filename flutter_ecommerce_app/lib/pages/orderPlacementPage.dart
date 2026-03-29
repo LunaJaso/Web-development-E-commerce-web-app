@@ -186,6 +186,8 @@ class _OrderPlacementPageState extends State<OrderPlacementPage> {
                         userId: authService.userId!,
                         productIds:
                             Cart.items.map((item) => item.product.id).toList(),
+                        quantities:
+                            Cart.items.map((item) => item.quantity).toList(),
                         totalAmount: totalAmount * 1.05,
                         orderDate: DateTime.now(),
                         address: Address(

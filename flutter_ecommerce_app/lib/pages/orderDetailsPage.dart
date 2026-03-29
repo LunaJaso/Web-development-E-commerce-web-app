@@ -163,51 +163,70 @@ class OrderDetailsPage extends StatelessWidget {
                     const SizedBox(height: 10),
 
                     // List of products in the order (uses spread operator to insert widgets for each product)
-                    ...products.map(
-                      (product) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Product Image
-                            if (product.image.isNotEmpty)
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  product.image,
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.cover,
+                    ...products.asMap().entries.map(
+                      (entry) {
+                        final index = entry.key;
+                        final product = entry.value;
+                        final quantity = order.quantities.isNotEmpty &&
+                                index < order.quantities.length
+                            ? order.quantities[index]
+                            : 1;
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Product Image
+                              if (product.image.isNotEmpty)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    product.image,
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              const SizedBox(width: 12),
+                              // Product Details
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Product name, price, and description (if isNotEmpty)
+                                    Text(
+                                      product.name,
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                        '\$${product.price.toStringAsFixed(2)}',
+                                        style: const TextStyle(
+                                            color: Colors.green)),
+                                    if (product.desc.isNotEmpty)
+                                      Text(
+                                        product.desc,
+                                        style: const TextStyle(
+                                            color: Colors.grey),
+                                      ),
+                                    const SizedBox(height: 4),
+                                    // Quantity display
+                                    Text(
+                                      'Quantity: $quantity',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.blueGrey,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            const SizedBox(width: 12),
-                            // Product Details
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Product name, price, and description (if isNotEmpty)
-                                  Text(
-                                    product.name,
-                                    style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  Text('\$${product.price.toStringAsFixed(2)}',
-                                      style:
-                                          const TextStyle(color: Colors.green)),
-                                  if (product.desc.isNotEmpty)
-                                    Text(
-                                      product.desc,
-                                      style:
-                                          const TextStyle(color: Colors.grey),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
