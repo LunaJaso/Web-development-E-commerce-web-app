@@ -55,4 +55,16 @@ class ProductsService {
     final allProducts = await getAllProducts();
     return allProducts.where((product) => ids.contains(product.id)).toList();
   }
+
+// Updates an existing product in the database
+  Future<void> updateProduct(String productId, Product product) async {
+    // Updates the product data at the input product ID
+    await _ref.child(productId).set(product.toJson());
+  }
+
+// Deletes a product from the database
+  Future<void> deleteProduct(String productId) async {
+    // Removes the product at the input product ID
+    await _ref.child(productId).remove();
+  }
 }
