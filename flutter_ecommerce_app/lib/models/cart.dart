@@ -13,16 +13,32 @@ class Cart {
   static final List<CartItem> items =
       []; // A list that holds all items in the cart
 
-// Adds a product to the cart, if it already exists it increases the quantity by 1
+// Adds a product to the cart, if the product is already in the cart, it increases the quantity
   static void add(Product product) {
     // Checks if product is already in the cart
     final index = items.indexWhere((item) => item.product == product);
 
-// Products is alread in the cart, increase quantity, otherwise add new product to cart
     if (index != -1) {
-      items[index].quantity += 1;
+      // Item already in cart
+      int newQuantity = items[index].quantity + 1;
+
+      if (newQuantity > product.stock) {
+        // If the new amount exceeds stock, set it to the maximum available stock
+        items[index].quantity = product.stock;
+      } else {
+        items[index].quantity = newQuantity;
+      }
     } else {
-      items.add(CartItem(product: product));
+      // Item not in cart, add it with quantity 1 (or 0 if out of stock)
+      int initialQuantity = product.stock > 0 ? 1 : 0;
+
+// Adds item to cart
+      items.add(
+        CartItem(
+          product: product,
+          quantity: initialQuantity,
+        ),
+      );
     }
   }
 

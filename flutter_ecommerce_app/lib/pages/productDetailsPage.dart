@@ -82,18 +82,29 @@ class ProductDetailsPage extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
 
-                        // Add to cart button, still needs coding logic
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Cart.add(product);
+                        // Add to cart button
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: product.stock == 0
+                                // Disables the button if out of stock
+                                ? null
+                                : () {
+                                    Cart.add(product);
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content:
-                                      Text('${product.name} added to cart')),
-                            );
-                          },
-                          child: const Text('Add to Cart'),
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            '${product.name} added to cart'),
+                                      ),
+                                    );
+                                  },
+                            child: Text(
+                              product.stock == 0
+                                  ? 'Out of Stock'
+                                  : 'Add to Cart',
+                            ),
+                          ),
                         ),
                       ),
                     ],

@@ -75,7 +75,18 @@ class _CartPageState extends State<CartPage> {
                             icon: const Icon(Icons.arrow_drop_up),
                             onPressed: () {
                               setState(() {
-                                cartItem.quantity += 1;
+                                if (cartItem.quantity < product.stock) {
+                                  cartItem.quantity += 1;
+                                } else {
+                                  cartItem.quantity = product.stock;
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Only ${product.stock} in stock'),
+                                    ),
+                                  );
+                                }
                               });
                             },
                           ),

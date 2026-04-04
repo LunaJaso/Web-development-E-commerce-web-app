@@ -90,7 +90,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
           });
         },
         itemCount: bannerColors.length,
-        // Builds each banner with a colored background and label 
+        // Builds each banner with a colored background and label
         itemBuilder: (context, index) {
           return ClipRRect(
             borderRadius: BorderRadius.circular(12),
@@ -128,6 +128,7 @@ class ProductsPage extends StatelessWidget {
         image: 'assets/images/dice1.jpg',
         desc: 'dice1',
         userId: 'default',
+        stock: 10,
       ),
       Product(
         id: 'featured2',
@@ -136,6 +137,7 @@ class ProductsPage extends StatelessWidget {
         image: 'assets/images/dice2.jpg',
         desc: 'dice2',
         userId: 'default',
+        stock: 10,
       ),
       Product(
         id: 'featured3',
@@ -144,6 +146,7 @@ class ProductsPage extends StatelessWidget {
         image: 'assets/images/dice3.jpg',
         desc: 'dice3',
         userId: 'default',
+        stock: 10,
       ),
       Product(
         id: 'featured4',
@@ -152,6 +155,7 @@ class ProductsPage extends StatelessWidget {
         image: 'assets/images/dice4.jpg',
         desc: 'dice4',
         userId: 'default',
+        stock: 10,
       ),
     ];
   }
@@ -334,7 +338,7 @@ class ProductsPage extends StatelessWidget {
                                           fit: BoxFit.cover),
                                 ),
                               ),
-                              // Displays product name 
+                              // Displays product name
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(

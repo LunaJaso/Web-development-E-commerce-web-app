@@ -22,6 +22,7 @@ class _MyAdminToolsPageState extends State<MyAdminToolsPage> {
   final _priceController = TextEditingController();
   final _imageController = TextEditingController();
   final _descController = TextEditingController();
+  final _stockController = TextEditingController();
 
   // Valdiates in case the user somehow uploads more than one product at a time
   bool _loading = false;
@@ -43,12 +44,14 @@ class _MyAdminToolsPageState extends State<MyAdminToolsPage> {
         _priceController.text = product.price.toString();
         _imageController.text = product.image;
         _descController.text = product.desc;
+        _stockController.text = product.stock.toString();
       } else {
         // Clear form for new product if not editing
         _nameController.clear();
         _priceController.clear();
         _imageController.clear();
         _descController.clear();
+        _stockController.clear();
       }
     });
   }
@@ -62,6 +65,7 @@ class _MyAdminToolsPageState extends State<MyAdminToolsPage> {
       _priceController.clear();
       _imageController.clear();
       _descController.clear();
+      _stockController.clear();
     });
   }
 
@@ -81,6 +85,7 @@ class _MyAdminToolsPageState extends State<MyAdminToolsPage> {
         image: _imageController.text.trim(),
         desc: _descController.text.trim(),
         userId: auth.userId!,
+        stock: int.parse(_stockController.text.trim()),
       );
 
       // Use the service to add or update products
@@ -194,6 +199,13 @@ class _MyAdminToolsPageState extends State<MyAdminToolsPage> {
               decoration: const InputDecoration(labelText: 'Description'),
               validator: (value) =>
                   value!.isEmpty ? 'Enter a description' : null,
+            ),
+            TextFormField(
+              controller: _stockController,
+              decoration: const InputDecoration(labelText: 'Stock'),
+              keyboardType: TextInputType.number,
+              validator: (value) =>
+                  value!.isEmpty ? 'Enter amount of stock' : null,
             ),
             const SizedBox(height: 20),
             ElevatedButton(

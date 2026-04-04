@@ -6,6 +6,7 @@ class Product {
   final String image;
   final String desc;
   final String userId;
+  final int stock;
 
   Product({
     required this.id,
@@ -14,6 +15,7 @@ class Product {
     required this.image,
     required this.desc,
     required this.userId,
+    required this.stock,
   });
 
 // Converts product data to a JSON for storage in Firebase
@@ -24,6 +26,7 @@ class Product {
       'image': image,
       'desc': desc,
       'userId': userId,
+      'stock': stock,
     };
   }
 
@@ -38,6 +41,9 @@ class Product {
       image: map['image'] as String? ?? '',
       desc: map['desc'] as String? ?? '',
       userId: map['userId'] as String? ?? '',
+      stock: (map['stock'] is num)
+          ? (map['stock'] as num).toInt()
+          : int.tryParse('${map['stock']}') ?? 0,
     );
   }
 }

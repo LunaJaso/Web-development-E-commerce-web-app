@@ -7,11 +7,14 @@ class OrdersService {
   factory OrdersService() => _instance;
   OrdersService._internal();
 
-  // Firebase reference
+  // Firebase reference for orders and products (I should rename this)
   final DatabaseReference _ref = FirebaseDatabase.instance.ref('orders');
+  final DatabaseReference _productsRef =
+      FirebaseDatabase.instance.ref('products');
 
   // Create a new order in Firebase
   Future<bool> createOrder(Order order) async {
+    // Save the order first
     await _ref.child(order.orderId).set({
       'userId': order.userId,
       'productIds': order.productIds,
@@ -26,6 +29,34 @@ class OrdersService {
         'country': order.address.country,
       },
     });
+
+    // Reduce stock for each product
+    for (int i = 0; i < order.productIds.length; i++) {
+      String productId = order.productIds[i];
+      int quantityOrdered = order.quantities[i];
+
+      // Fetch current stock for the product
+      final productSnapshot = await _productsRef.child(productId).get();
+      //If the product exists, update the stock
+      if (productSnapshot.exists) {
+        final productData =
+            Map<String, dynamic>.from(productSnapshot.value as dynamic);
+
+        // Calculate new stock
+        int currentStock = productData['stock'] ?? 0;
+        // Calculate new stock after order
+        int newStock = currentStock - quantityOrdered;
+
+        // Prevents negative stock
+        if (newStock < 0) newStock = 0;
+
+        // Update the stock in Firebase
+        await _productsRef.child(productId).update({
+          'stock': newStock,
+        });
+      }
+    }
+
     return true;
   }
 
