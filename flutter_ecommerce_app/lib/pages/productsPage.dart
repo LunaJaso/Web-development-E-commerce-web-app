@@ -162,102 +162,118 @@ class ProductsPage extends StatelessWidget {
 
 // Builds the featured products section, which is a horizontally scrollable list of hardcoded products
   Widget buildFeaturedSection() {
-    final featured = getFeaturedProducts();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section header
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text(
-            'Featured Products',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
-        const SizedBox(height: 12),
-        // Horizontally scrollable list of featured products
-        SizedBox(
-          height: 220,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: featured.length,
-            itemBuilder: (context, index) {
-              final product = featured[index];
-              return Padding(
-                padding: const EdgeInsets.only(right: 12, left: 8),
-                // Each product is displayed in a card that can be tapped to navigate to the product details page
-                child: GestureDetector(
-                  onTap: () {
-                    // Navigates to the ProductDetailsPage when tapped
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => ProductDetailsPage(product: product),
+    final List<String> featuredIds = ['1', '2', '3', '4'];
+
+    return FutureBuilder<List<Product>>(
+      future: ProductsService().getProductsByIds(featuredIds),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        final featured = snapshot.data ?? [];
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Section header
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                'Featured Products',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 12),
+            // Horizontally scrollable list of featured products
+            SizedBox(
+              height: 220,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: featured.length,
+                itemBuilder: (context, index) {
+                  final product = featured[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 12, left: 8),
+                    // Each product is displayed in a card that can be tapped to navigate to the product details page
+                    child: GestureDetector(
+                      onTap: () {
+                        // Navigates to the ProductDetailsPage when tapped
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ProductDetailsPage(product: product),
+                          ),
+                        );
+                      },
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 3,
+                        child: SizedBox(
+                          width: 140,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Displays product image
+                              AspectRatio(
+                                aspectRatio: 1,
+                                child: ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(12),
+                                  ),
+                                  // Loads online first, if not loads locally (this is the way the project works for demonstration)
+                                  child: product.image.startsWith('http')
+                                      ? Image.network(product.image,
+                                          fit: BoxFit.cover)
+                                      : Image.asset(product.image,
+                                          fit: BoxFit.cover),
+                                ),
+                              ),
+                              // Displays product name and price
+                              Padding(
+                                padding: const EdgeInsets.all(6.0),
+                                child: Text(
+                                  product.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              // Displays product price, formated to 2 decimal points
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 6.0),
+                                child: Text(
+                                  '\$${product.price.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    );
-                  },
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
                     ),
-                    elevation: 3,
-                    child: SizedBox(
-                      width: 140,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Displays product image
-                          AspectRatio(
-                            aspectRatio: 1,
-                            child: ClipRRect(
-                              borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(12),
-                              ),
-                              // Loads online first, if not loads locally (this is the way the project works for demonstration)
-                              child: product.image.startsWith('http')
-                                  ? Image.network(product.image,
-                                      fit: BoxFit.cover)
-                                  : Image.asset(product.image,
-                                      fit: BoxFit.cover),
-                            ),
-                          ),
-                          // Displays product name and price
-                          Padding(
-                            padding: const EdgeInsets.all(6.0),
-                            child: Text(
-                              product.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          // Displays product price, formated to 2 decimal points
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 6.0),
-                            child: Text(
-                              '\$${product.price.toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Colors.green,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 20),
-      ],
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        );
+      },
     );
   }
 

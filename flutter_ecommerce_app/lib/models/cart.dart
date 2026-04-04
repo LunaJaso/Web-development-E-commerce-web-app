@@ -16,7 +16,7 @@ class Cart {
 // Adds a product to the cart, if the product is already in the cart, it increases the quantity
   static void add(Product product) {
     // Checks if product is already in the cart
-    final index = items.indexWhere((item) => item.product == product);
+    final index = items.indexWhere((item) => item.product.id == product.id);
 
     if (index != -1) {
       // Item already in cart
@@ -45,6 +45,6 @@ class Cart {
 // Removes a product from the cart
   static void remove(Product product) {
     // Removes the matching product from the cart
-    items.removeWhere((item) => item.product == product);
+    items.removeWhere((item) => item.product.id == product.id);
   }
 }
