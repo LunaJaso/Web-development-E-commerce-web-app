@@ -118,48 +118,6 @@ class _BannerCarouselState extends State<BannerCarousel> {
 class ProductsPage extends StatelessWidget {
   const ProductsPage({super.key});
 
-  // Hardcoded feature section products
-  List<Product> getFeaturedProducts() {
-    return [
-      Product(
-        id: 'featured1',
-        name: 'Dice1',
-        price: 79.99,
-        image: 'assets/images/dice1.jpg',
-        desc: 'dice1',
-        userId: 'default',
-        stock: 10,
-      ),
-      Product(
-        id: 'featured2',
-        name: 'Dice2',
-        price: 49.99,
-        image: 'assets/images/dice2.jpg',
-        desc: 'dice2',
-        userId: 'default',
-        stock: 10,
-      ),
-      Product(
-        id: 'featured3',
-        name: 'Dice3',
-        price: 99.99,
-        image: 'assets/images/dice3.jpg',
-        desc: 'dice3',
-        userId: 'default',
-        stock: 10,
-      ),
-      Product(
-        id: 'featured4',
-        name: 'Dice4',
-        price: 199.99,
-        image: 'assets/images/dice4.jpg',
-        desc: 'dice4',
-        userId: 'default',
-        stock: 10,
-      ),
-    ];
-  }
-
 // Builds the featured products section, which is a horizontally scrollable list of hardcoded products
   Widget buildFeaturedSection() {
     final List<String> featuredIds = ['1', '2', '3', '4'];
