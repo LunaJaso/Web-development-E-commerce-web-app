@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import '../models/order.dart';
 import '../models/product.dart';
+import '../services/orders_service.dart';
 
-class OrderDetailsPage extends StatelessWidget {
+// I know there is some extra code in here that doesen't work and should be cleaned up, but it does in fact work now and I dont wanna ruin it
+// Converted this page to a StatefulWidget to manage the cancellation state of the order and update the UI accordingly
+class OrderDetailsPage extends StatefulWidget {
   // Order object
   final Order order;
 
@@ -15,7 +18,23 @@ class OrderDetailsPage extends StatelessWidget {
     required this.products,
   });
 
- // Formats DateTime object
+  @override
+  State<OrderDetailsPage> createState() => _OrderDetailsPageState();
+}
+
+class _OrderDetailsPageState extends State<OrderDetailsPage> {
+  // Local copy of the order to update its state
+  late Order order;
+  // Tracks if orders is in the process of being cancelled
+  bool _isCancelling = false;
+
+  @override
+  void initState() {
+    super.initState();
+    order = widget.order;
+  }
+
+  // Formats DateTime object
   String formatDate(DateTime date) {
     // Month names
     final months = [
@@ -32,7 +51,7 @@ class OrderDetailsPage extends StatelessWidget {
       'November',
       'December'
     ];
-    
+
     // Convert to 12-hour format
     int hour = date.hour;
     final minute = date.minute.toString().padLeft(2, '0');
@@ -42,12 +61,13 @@ class OrderDetailsPage extends StatelessWidget {
 
     // Convert to 12-hour format
     if (hour == 0) {
-      hour = 12; } 
-    else if (hour > 12) {
-      hour -= 12; }
+      hour = 12;
+    } else if (hour > 12) {
+      hour -= 12;
+    }
 
-// Final formatted string
-    return '${months[date.month - 1]} ${date.day}, ${date.year} – ${hour.toString().padLeft(2, '0')}:$minute $amPm';
+    // Final formatted string
+    return '${months[date.month - 1]} ${date.day}, ${date.year} - ${hour.toString().padLeft(2, '0')}:$minute $amPm';
   }
 
   @override
@@ -57,7 +77,6 @@ class OrderDetailsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Order Details')),
-
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -163,7 +182,7 @@ class OrderDetailsPage extends StatelessWidget {
                     const SizedBox(height: 10),
 
                     // List of products in the order (uses spread operator to insert widgets for each product)
-                    ...products.asMap().entries.map(
+                    ...widget.products.asMap().entries.map(
                       (entry) {
                         final index = entry.key;
                         final product = entry.value;
@@ -201,14 +220,15 @@ class OrderDetailsPage extends StatelessWidget {
                                           fontWeight: FontWeight.bold),
                                     ),
                                     Text(
-                                        '\$${product.price.toStringAsFixed(2)}',
-                                        style: const TextStyle(
-                                            color: Colors.green)),
+                                      '\$${product.price.toStringAsFixed(2)}',
+                                      style:
+                                          const TextStyle(color: Colors.green),
+                                    ),
                                     if (product.desc.isNotEmpty)
                                       Text(
                                         product.desc,
-                                        style: const TextStyle(
-                                            color: Colors.grey),
+                                        style:
+                                            const TextStyle(color: Colors.grey),
                                       ),
                                     const SizedBox(height: 4),
                                     // Quantity display
@@ -233,6 +253,94 @@ class OrderDetailsPage extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                order.isCancelled || _isCancelling ? Colors.grey : Colors.red,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+          ),
+          child: Text(
+            // This doesen't work, couldn't fix it, but the rest of the logic does
+            order.isCancelled
+                ? 'Order Cancelled'
+                : (_isCancelling ? 'Cancelling...' : 'Cancel Order'),
+            style: const TextStyle(fontSize: 18),
+          ),
+          onPressed: order.isCancelled || _isCancelling
+              ? null // Supposed to disables button if already cancelled or cancelling
+              : () async {
+                  final now = DateTime.now();
+                  final canCancel =
+                      now.difference(order.orderDate).inHours < 24;
+
+// Checks if order can be cancelled (within 24 hours)
+                  if (!canCancel) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content:
+                            Text('Cannot cancel orders older than 24 hours'),
+                      ),
+                    );
+                    return;
+                  }
+
+// Shows confirmation dialog before cancelling
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      title: const Text('Cancel Order'),
+                      content: const Text(
+                          'Are you sure you want to cancel this order?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('No'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Yes'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (confirm != true) return;
+
+                  // Prevents duplicate cancellations
+                  setState(() {
+                    _isCancelling = true;
+                  });
+
+                  try {
+                    // Cancel the order (orders_service now restores the stock)
+                    await OrdersService().cancelOrder(order.orderId);
+
+                    // Updates local state
+                    setState(() {
+                      order.isCancelled = true;
+                      _isCancelling = false;
+                    });
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Order cancelled successfully')),
+                    );
+
+                    // Reloads last pages orders (Not sure if this is working)
+                    Navigator.pop(context, true);
+                  } catch (e) {
+                    setState(() {
+                      _isCancelling = false;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error cancelling order: $e')),
+                    );
+                  }
+                },
         ),
       ),
     );

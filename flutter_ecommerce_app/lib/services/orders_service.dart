@@ -98,5 +98,46 @@ class OrdersService {
 // Returns the list of orders for the current user
     return orders;
   }
-}
 
+// Checks if an order can be cancelled (within 24 hours of placing the order)
+  bool canCancelOrder(Order order) {
+    final now = DateTime.now();
+    final difference = now.difference(order.orderDate);
+    return difference.inHours < 24;
+  }
+
+// Cancels an order by marking it as cancelled and restoring stock for the products in the order
+  Future<void> cancelOrder(String orderId) async {
+    final snapshot = await _ref.child(orderId).get();
+    if (!snapshot.exists) return;
+
+    final orderData = Map<String, dynamic>.from(snapshot.value as dynamic);
+
+    // Checks if order is already cancelled to prevent duplicate cancellations
+    if (orderData['isCancelled'] == true) {
+      throw Exception('Order is already cancelled');
+    }
+
+    final List<String> productIds = List<String>.from(orderData['productIds']);
+    final List<int> quantities = List<int>.from(orderData['quantities']);
+
+    // Restores stock for each product
+    for (int i = 0; i < productIds.length; i++) {
+      final productId = productIds[i];
+      final quantity = quantities[i];
+
+      final productSnapshot = await _productsRef.child(productId).get();
+      if (productSnapshot.exists) {
+        final productData =
+            Map<String, dynamic>.from(productSnapshot.value as dynamic);
+        int currentStock = productData['stock'] ?? 0;
+        await _productsRef
+            .child(productId)
+            .update({'stock': currentStock + quantity});
+      }
+    }
+
+    // Marks order as cancelled
+    await _ref.child(orderId).update({'isCancelled': true});
+  }
+}

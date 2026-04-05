@@ -11,6 +11,7 @@ class OrdersPage extends StatefulWidget {
   @override
   State<OrdersPage> createState() => _OrdersPageState();
 }
+
 // Stateful widget for the orders page, which displays a list of the user's orders and allows them to view details for each order
 class _OrdersPageState extends State<OrdersPage> {
   // List of orders and loading state
@@ -24,6 +25,7 @@ class _OrdersPageState extends State<OrdersPage> {
     // Load orders when the page is initialized
     loadOrders();
   }
+
 // Loads orders for current user
   Future<void> loadOrders() async {
     // Authenticates current user
@@ -31,7 +33,7 @@ class _OrdersPageState extends State<OrdersPage> {
     // Fetch orders for current userId
     final fetchedOrders = await OrdersService().getOrders(authService.userId!);
 
-// Updates UI
+// Refreshes UI
     setState(() {
       orders = fetchedOrders;
       isLoading = false;
@@ -46,7 +48,7 @@ class _OrdersPageState extends State<OrdersPage> {
           ? const Center(child: CircularProgressIndicator())
           : orders.isEmpty
               ? const Center(child: Text('No orders'))
-              // List of orders displayed using ListView.builder1
+              // List of orders displayed using ListView.builder
               : ListView.builder(
                   itemCount: orders.length, // Number of orders to display
                   itemBuilder: (context, index) {
@@ -71,12 +73,12 @@ class _OrdersPageState extends State<OrdersPage> {
                           ],
                         ),
                         onTap: () async {
-                          // When an order is tapped, fetch the products for that order and navigate to the OrderDetailsPage
+                          // When an order is tapped, fetch the products for that order
                           final products = await ProductsService()
                               .getProductsByIds(order.productIds);
 
-                          //Navigates to the OrderDetailsPage
-                          Navigator.push(
+                          // Navigates to the OrderDetailsPage, passing the order and its products
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) => OrderDetailsPage(
@@ -85,6 +87,11 @@ class _OrdersPageState extends State<OrdersPage> {
                               ),
                             ),
                           );
+
+                          // Reloads all orders
+                          if (result == true) {
+                            await loadOrders();
+                          }
                         },
                       ),
                     );

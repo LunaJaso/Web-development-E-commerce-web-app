@@ -9,6 +9,7 @@ class Order {
   final double totalAmount;
   final DateTime orderDate;
   final Address address;
+  bool isCancelled;
 
   Order({
     required this.orderId,
@@ -18,5 +19,6 @@ class Order {
     required this.orderDate,
     required this.address,
     this.quantities = const [],
+    this.isCancelled = false,
   });
 }

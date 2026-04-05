@@ -18,6 +18,19 @@ class Product {
     required this.stock,
   });
 
+// Creates a copy of the product with an updated stock value, used when cancelling an order to restore stock
+  Product copyProduct({int? stock}) {
+    return Product(
+      id: id,
+      name: name,
+      desc: desc,
+      image: image,
+      price: price,
+      stock: stock ?? this.stock,
+      userId: userId,
+    );
+  }
+
 // Converts product data to a JSON for storage in Firebase
   Map<String, dynamic> toJson() {
     return {
