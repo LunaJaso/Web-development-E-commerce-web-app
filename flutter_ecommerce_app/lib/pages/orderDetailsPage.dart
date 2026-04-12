@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../auth/authentication.dart';
 import '../models/order.dart';
 import '../models/product.dart';
 import '../services/orders_service.dart';
@@ -27,6 +28,9 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
   late Order order;
   // Tracks if orders is in the process of being cancelled
   bool _isCancelling = false;
+  // Tracks if order is in the process of being marked as shipped
+  bool _isShipping = false;
+  final AuthService _auth = AuthService();
 
   @override
   void initState() {
@@ -161,6 +165,29 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
               ),
             ),
 
+            // Order status (cancelled, shipped, or pending)
+            const SizedBox(height: 20),
+
+            Card(
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    const Icon(Icons.info_outline,
+                        size: 20, color: Colors.blueGrey),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Status: ${order.isCancelled ? 'Cancelled' : order.isShipped ? 'Shipped' : 'Pending'}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
             const SizedBox(height: 20),
 
             // Products List
@@ -255,92 +282,262 @@ class _OrderDetailsPageState extends State<OrderDetailsPage> {
           ],
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor:
-                order.isCancelled || _isCancelling ? Colors.grey : Colors.red,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-          ),
-          child: Text(
-            // This doesen't work, couldn't fix it, but the rest of the logic does
-            order.isCancelled
-                ? 'Order Cancelled'
-                : (_isCancelling ? 'Cancelling...' : 'Cancel Order'),
-            style: const TextStyle(fontSize: 18),
-          ),
-          onPressed: order.isCancelled || _isCancelling
-              ? null // Supposed to disables button if already cancelled or cancelling
-              : () async {
-                  final now = DateTime.now();
-                  final canCancel =
-                      now.difference(order.orderDate).inHours < 24;
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: _auth.isAdmin
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              // Disable the cancel button if the order is already cancelled, shipped, or in the process of being cancelled (The colors now work!!!)
+                              backgroundColor: order.isCancelled ||
+                                      order.isShipped ||
+                                      _isCancelling
+                                  ? Colors.grey
+                                  : Colors.red,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: Text(
+                              order.isCancelled
+                                  ? 'Order Cancelled'
+                                  : (_isCancelling
+                                      ? 'Cancelling...'
+                                      : 'Cancel Order'),
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                            onPressed: order.isCancelled ||
+                                    order.isShipped ||
+                                    _isCancelling
+                                ? null
+                                : () async {
+                                    final now = DateTime.now();
+                                    final canCancel = now
+                                            .difference(order.orderDate)
+                                            .inHours <
+                                        24;
 
-// Checks if order can be cancelled (within 24 hours)
-                  if (!canCancel) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content:
-                            Text('Cannot cancel orders older than 24 hours'),
-                      ),
-                    );
-                    return;
-                  }
+                                    // Admins may cancel any order regardless of DateTime
+                                    if (!_auth.isAdmin && !canCancel) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(const SnackBar(
+                                        content: Text(
+                                            'Cannot cancel orders older than 24 hours'),
+                                      ));
+                                      return;
+                                    }
 
-// Shows confirmation dialog before cancelling
-                  final confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text('Cancel Order'),
-                      content: const Text(
-                          'Are you sure you want to cancel this order?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, false),
-                          child: const Text('No'),
+                                    // Shows confirmation dialog before cancelling
+                                    final confirm = await showDialog<bool>(
+                                      context: context,
+                                      builder: (_) => AlertDialog(
+                                        title: const Text('Cancel Order'),
+                                        content: const Text(
+                                            'Are you sure you want to cancel this order?'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, false),
+                                            child: const Text('No'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context, true),
+                                            child: const Text('Yes'),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+
+                                    if (confirm != true) return;
+
+                                    setState(() {
+                                      _isCancelling = true;
+                                    });
+
+                                    try {
+                                      await OrdersService()
+                                          .cancelOrder(order.orderId);
+
+                                      setState(() {
+                                        order.isCancelled = true;
+                                        _isCancelling = false;
+                                      });
+
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'Order cancelled successfully')),
+                                      );
+
+                                      Navigator.pop(context, true);
+                                    } catch (e) {
+                                      setState(() {
+                                        _isCancelling = false;
+                                      });
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Error cancelling order: $e')),
+                                      );
+                                    }
+                                  },
+                          ),
                         ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Yes'),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: order.isCancelled ||
+                                      order.isShipped ||
+                                      _isShipping
+                                  ? Colors.grey
+                                  : Colors.blue,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: Text(
+                              order.isShipped
+                                  ? 'Order Shipped'
+                                  : (_isShipping
+                                      ? 'Marking...'
+                                      : 'Mark as Shipped'),
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                            onPressed: order.isCancelled ||
+                                    order.isShipped ||
+                                    _isShipping
+                                ? null
+                                : () async {
+                                    setState(() {
+                                      _isShipping = true;
+                                    });
+                                    try {
+                                      await OrdersService()
+                                          .markOrderAsShipped(order.orderId);
+                                      setState(() {
+                                        order.isShipped = true;
+                                        _isShipping = false;
+                                      });
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'Order marked as shipped')),
+                                      );
+                                      Navigator.pop(context, true);
+                                    } catch (e) {
+                                      setState(() {
+                                        _isShipping = false;
+                                      });
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Error shipping order: $e')),
+                                      );
+                                    }
+                                  },
+                          ),
                         ),
                       ],
                     ),
-                  );
+                  ],
+                )
+              : ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        order.isCancelled || order.isShipped || _isCancelling
+                            ? Colors.grey
+                            : Colors.red,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                  child: Text(
+                    order.isCancelled
+                        ? 'Order Cancelled'
+                        : order.isShipped
+                            ? 'Order Shipped'
+                            : (_isCancelling
+                                ? 'Cancelling...'
+                                : 'Cancel Order'),
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                  onPressed: order.isCancelled ||
+                          order.isShipped ||
+                          _isCancelling
+                      ? null
+                      : () async {
+                          final now = DateTime.now();
+                          final canCancel =
+                              now.difference(order.orderDate).inHours < 24;
 
-                  if (confirm != true) return;
+                          if (!canCancel) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Cannot cancel orders older than 24 hours'),
+                              ),
+                            );
+                            return;
+                          }
 
-                  // Prevents duplicate cancellations
-                  setState(() {
-                    _isCancelling = true;
-                  });
+                          final confirm = await showDialog<bool>(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              title: const Text('Cancel Order'),
+                              content: const Text(
+                                  'Are you sure you want to cancel this order?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('No'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('Yes'),
+                                ),
+                              ],
+                            ),
+                          );
 
-                  try {
-                    // Cancel the order (orders_service now restores the stock)
-                    await OrdersService().cancelOrder(order.orderId);
+                          if (confirm != true) return;
 
-                    // Updates local state
-                    setState(() {
-                      order.isCancelled = true;
-                      _isCancelling = false;
-                    });
+                          setState(() {
+                            _isCancelling = true;
+                          });
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Order cancelled successfully')),
-                    );
+                          try {
+                            await OrdersService().cancelOrder(order.orderId);
 
-                    // Reloads last pages orders (Not sure if this is working)
-                    Navigator.pop(context, true);
-                  } catch (e) {
-                    setState(() {
-                      _isCancelling = false;
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error cancelling order: $e')),
-                    );
-                  }
-                },
+                            setState(() {
+                              order.isCancelled = true;
+                              _isCancelling = false;
+                            });
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content:
+                                      Text('Order cancelled successfully')),
+                            );
+
+                            Navigator.pop(context, true);
+                          } catch (e) {
+                            setState(() {
+                              _isCancelling = false;
+                            });
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text('Error cancelling order: $e')),
+                            );
+                          }
+                        },
+                ),
         ),
       ),
     );

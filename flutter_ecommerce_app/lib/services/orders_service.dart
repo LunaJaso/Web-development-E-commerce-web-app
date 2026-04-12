@@ -12,6 +12,46 @@ class OrdersService {
   final DatabaseReference _productsRef =
       FirebaseDatabase.instance.ref('products');
 
+// Retrieves all orders from Firebase and converts them to a list of Order objects (for admin users)
+  Future<List<Order>> getAllOrders() async {
+    final snapshot = await _ref.get();
+
+    if (!snapshot.exists) return [];
+
+    final data = Map<String, dynamic>.from(snapshot.value as dynamic);
+
+    final List<Order> orders = [];
+
+    data.forEach((key, value) {
+      final orderData = Map<String, dynamic>.from(value);
+
+// Adds all orders to the list, regardless of userId (admin can see all orders)
+      orders.add(
+        Order(
+          orderId: key,
+          userId: orderData['userId'],
+          productIds: List<String>.from(orderData['productIds']),
+          quantities: orderData['quantities'] != null
+              ? List<int>.from(orderData['quantities'])
+              : [],
+          totalAmount: orderData['totalAmount'],
+          orderDate: DateTime.parse(orderData['orderDate']),
+          address: Address(
+            street: orderData['address']['street'],
+            city: orderData['address']['city'],
+            state: orderData['address']['state'],
+            zipCode: orderData['address']['zipCode'],
+            country: orderData['address']['country'],
+          ),
+          isCancelled: orderData['isCancelled'] == true,
+          isShipped: orderData['isShipped'] == true,
+        ),
+      );
+    });
+// Returns the list of all orders for admin users
+    return orders;
+  }
+
   // Create a new order in Firebase
   Future<bool> createOrder(Order order) async {
     // Save the order first
@@ -28,6 +68,8 @@ class OrdersService {
         'zipCode': order.address.zipCode,
         'country': order.address.country,
       },
+      'isCancelled': order.isCancelled,
+      'isShipped': order.isShipped,
     });
 
     // Reduce stock for each product
@@ -91,6 +133,8 @@ class OrdersService {
               zipCode: orderData['address']['zipCode'],
               country: orderData['address']['country'],
             ),
+            isCancelled: orderData['isCancelled'] == true,
+            isShipped: orderData['isShipped'] == true,
           ),
         );
       }
@@ -139,5 +183,48 @@ class OrdersService {
 
     // Marks order as cancelled
     await _ref.child(orderId).update({'isCancelled': true});
+  }
+
+// Marks an order as shipped
+  Future<void> markOrderAsShipped(String orderId) async {
+    await _ref.child(orderId).update({
+      'isShipped': true,
+    });
+  }
+
+  // Deletes an order from Firebase (admin only)
+  Future<void> deleteOrder(String orderId) async {
+    await _ref.child(orderId).remove();
+  }
+
+  // Updates an order's details in Firebase (admin only)
+  Future<void> updateOrder(Order order) async {
+    await _ref.child(order.orderId).update({
+      'address': {
+        'street': order.address.street,
+        'city': order.address.city,
+        'state': order.address.state,
+        'zipCode': order.address.zipCode,
+        'country': order.address.country,
+      },
+      'isCancelled': order.isCancelled,
+      'isShipped': order.isShipped,
+      'productIds': order.productIds,
+      'quantities': order.quantities,
+      'totalAmount': order.totalAmount,
+    });
+  }
+
+  // Adjusts stock for a product by the given amount (admin only)
+  Future<void> adjustStock(String productId, int quantityChange) async {
+    final productSnapshot = await _productsRef.child(productId).get();
+    if (productSnapshot.exists) {
+      final productData =
+          Map<String, dynamic>.from(productSnapshot.value as dynamic);
+      int currentStock = productData['stock'] ?? 0;
+      int newStock = currentStock + quantityChange;
+      if (newStock < 0) newStock = 0;
+      await _productsRef.child(productId).update({'stock': newStock});
+    }
   }
 }

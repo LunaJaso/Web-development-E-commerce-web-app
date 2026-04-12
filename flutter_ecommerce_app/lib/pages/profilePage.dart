@@ -147,7 +147,8 @@ class _ProfilePageState extends State<ProfilePage> {
           onTap: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const OrdersPage()),
+              MaterialPageRoute(
+                  builder: (context) => OrdersPage(isAdmin: isAdmin)),
             );
           },
         ),

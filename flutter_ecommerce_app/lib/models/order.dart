@@ -10,6 +10,7 @@ class Order {
   final DateTime orderDate;
   final Address address;
   bool isCancelled;
+  bool isShipped;
 
   Order({
     required this.orderId,
@@ -20,5 +21,6 @@ class Order {
     required this.address,
     this.quantities = const [],
     this.isCancelled = false,
+    this.isShipped = false,
   });
 }
