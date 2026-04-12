@@ -61,17 +61,17 @@ class _BannerCarouselState extends State<BannerCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    // Colors for banners, can be replaced with images
-    final List<Color> bannerColors = [
-      const Color(0xFFFF6B6B),
-      const Color(0xFF4ECDC4),
-      const Color(0xFF45B7D1),
-      const Color(0xFFFFA502),
+    // Banner Images
+    final List<String> bannerImages = [
+      'banners/banner1.jpg',
+      'banners/banner2.jpg',
+      'banners/banner3.jpg',
+      'banners/banner4.jpg',
     ];
 
     // Labels for banners
     final List<String> bannerLabels = [
-      'Sale 50% Off',
+      '',
       'New Arrivals',
       'Free Shipping',
       'Exclusive Deals'
@@ -89,13 +89,18 @@ class _BannerCarouselState extends State<BannerCarousel> {
             _currentBannerIndex = index;
           });
         },
-        itemCount: bannerColors.length,
+        itemCount: bannerImages.length,
         // Builds each banner with a colored background and label
         itemBuilder: (context, index) {
           return ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Container(
-              color: bannerColors[index],
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(bannerImages[index]),
+                  fit: BoxFit.cover,
+                ),
+              ),
               child: Center(
                 child: Text(
                   bannerLabels[index],
